@@ -1,0 +1,34 @@
+# Workaround to improve network performance
+# sudo iwconfig wlan0 txpower 10dBm
+
+# Italian keyboard
+setxkbmap it
+
+# High-dpi settings (useless)
+# export GDK_SCALE=2
+# export GDK_DPI_SCALE=0.95
+# export QT_SCREEN_SCALE_FACTOR=0.9
+# export QT_AUTO_SCREEN_SCALE_FACTOR=2
+# export QT_SCALE_FACTOR=2
+
+# High-dpi settings
+xrandr --dpi 192
+xrdb -merge $HOME/.Xresources
+
+# Top bar
+slstatus 2> /dev/null &
+
+# Lock screen after 10 minutes
+# xautolock -time 10 -locker slock
+
+# Natural scrolling
+xinput --set-prop "Apple SPI Touchpad" "libinput Natural Scrolling Enabled" 1
+
+# Wallpaper
+nitrogen --restore &
+
+# Picom for smooth transitions
+picom -b
+
+# Window manager
+exec dwm
