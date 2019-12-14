@@ -1,0 +1,6 @@
+#e303e4		pink
+#0fbd8a		green
+#f2d881		yellow
+#105db5		blue
+#906cc9		violet
+#8ee6d6		cyan
