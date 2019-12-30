@@ -1,0 +1,81 @@
+diff --git a/config.def.h b/config.def.h
+index 1edb647..63d9008 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -4,17 +4,18 @@
+ static int topbar = 1;                      /* -b  option; if 0, dmenu appears at bottom     */
+ /* -fn option overrides fonts[0]; default X11 font or font set */
+ static const char *fonts[] = {
+-	"monospace:size=10"
++	"monospace:size=8"
+ };
+-static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
++static const char *prompt = NULL;      /* -p  option; prompt to the left of input field */
+ static const char *colors[SchemeLast][2] = {
+-	/*     fg         bg       */
+-	[SchemeNorm] = { "#bbbbbb", "#222222" },
+-	[SchemeSel] = { "#eeeeee", "#005577" },
+-	[SchemeOut] = { "#000000", "#00ffff" },
++	/*     		  fg         bg       */
++	[SchemeNorm] = 	{ "#bbbbbb", "#222222" },
++	[SchemeSel] = 	{ "#eeeeee", "#005577" },
++	[SchemeOut] = 	{ "#000000", "#e303e4" },
+ };
+ /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
+ static unsigned int lines      = 0;
++static unsigned int lineheight = 60;
+ 
+ /*
+  * Characters not considered part of a word while deleting words
+diff --git a/dmenu.c b/dmenu.c
+index 65f25ce..6893942 100644
+--- a/dmenu.c
++++ b/dmenu.c
+@@ -131,7 +131,7 @@ drawmenu(void)
+ {
+ 	unsigned int curpos;
+ 	struct item *item;
+-	int x = 0, y = 0, w;
++	int x = 0, y = 0, fh = drw->fonts->h, w;
+ 
+ 	drw_setscheme(drw, scheme[SchemeNorm]);
+ 	drw_rect(drw, 0, 0, mw, mh, 1, 1);
+@@ -148,7 +148,7 @@ drawmenu(void)
+ 	curpos = TEXTW(text) - TEXTW(&text[cursor]);
+ 	if ((curpos += lrpad / 2 - 1) < w) {
+ 		drw_setscheme(drw, scheme[SchemeNorm]);
+-		drw_rect(drw, x + curpos, 2, 2, bh - 4, 1, 0);
++		drw_rect(drw, x + curpos, 2 + (bh - fh ) / 2, 2, fh - 4, 1, 0);
+ 	}
+ 
+ 	if (lines > 0) {
+@@ -608,7 +608,7 @@ setup(void)
+ 	utf8 = XInternAtom(dpy, "UTF8_STRING", False);
+ 
+ 	/* calculate menu geometry */
+-	bh = drw->fonts->h + 2;
++	bh = MAX(bh, lineheight);
+ 	lines = MAX(lines, 0);
+ 	mh = (lines + 1) * bh;
+ #ifdef XINERAMA
+@@ -690,6 +690,7 @@ static void
+ usage(void)
+ {
+ 	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
++	      "		    [-h height]\n"
+ 	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
+ 	exit(1);
+ }
+@@ -723,7 +724,11 @@ main(int argc, char *argv[])
+ 			prompt = argv[++i];
+ 		else if (!strcmp(argv[i], "-fn"))  /* font or font set */
+ 			fonts[0] = argv[++i];
+-		else if (!strcmp(argv[i], "-nb"))  /* normal background color */
++		else if(!strcmp(argv[i], "-h")) { /* minimum height of one menu line */
++			lineheight = atoi(argv[++i]);
++			lineheight = MAX(lineheight,8); /* reasonable default in case of value too small/negative */
++		}
++ 		else if (!strcmp(argv[i], "-nb"))  /* normal background color */
+ 			colors[SchemeNorm][ColBg] = argv[++i];
+ 		else if (!strcmp(argv[i], "-nf"))  /* normal foreground color */
+ 			colors[SchemeNorm][ColFg] = argv[++i];
