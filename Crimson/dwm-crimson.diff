@@ -1,8 +1,8 @@
 diff --git a/config.def.h b/config.def.h
-index 1c0b587..2055f56 100644
+index 1c0b587..15270b1 100644
 --- a/config.def.h
 +++ b/config.def.h
-@@ -1,25 +1,46 @@
+@@ -1,50 +1,70 @@
  /* See LICENSE file for copyright and license details. */
  
  /* appearance */
@@ -42,9 +42,9 @@ index 1c0b587..2055f56 100644
 -	/*               fg         bg         border   */
 -	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
 -	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan  },
-+	/*               fg        bg         border   */
-+	[SchemeNorm] = { col_sel,  col_vdark, col_dark  },
-+	[SchemeSel]  = { col_full, col_vdark, col_sel   },
++	/*               fg        bg         border  */
++	[SchemeNorm] = { col_sel,  col_vdark, col_dark },
++	[SchemeSel]  = { col_full, col_vdark, col_sel  },
 +};
 +
 +static const unsigned int baralpha 	  = ~OPAQUE;
@@ -60,18 +60,18 @@ index 1c0b587..2055f56 100644
  /* tagging */
 -static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 +static const char *tags[] 	 = { "01", "02", "03", "04", "05" };
-+static const char *alttags[] = { "<01>", "<02>", "<03>", "<04>", "<05>" };
++static const char *alttags[] = { "01.", "02.", "03.", "04.", "05." };
  
  static const Rule rules[] = {
  	/* xprop(1):
-@@ -27,24 +48,25 @@ static const Rule rules[] = {
+ 	 *	WM_CLASS(STRING) = instance, class
  	 *	WM_NAME(STRING) = title
  	 */
- 	/* class      instance    title       tags mask     isfloating   monitor */
+-	/* class      instance    title       tags mask     isfloating   monitor */
 -	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
-+	// { "Gimp",     NULL,       NULL,       0,            1,           -1 },
- 	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
-+	// { "Zeal",     NULL,	  NULL,	      1 << 2,	    0,		 -1 },
+-	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
++	/* class      instance    title   tags mask   isfloating   ispermanent  monitor */
++	{ "Polybar",  "polybar",  NULL,   ~0,         True,        1			-1 },
  };
  
  /* layout(s) */
@@ -96,7 +96,7 @@ index 1c0b587..2055f56 100644
  #define TAGKEYS(KEY,TAG) \
  	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
  	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
-@@ -53,30 +75,56 @@ static const Layout layouts[] = {
+@@ -53,30 +73,56 @@ static const Layout layouts[] = {
  
  /* helper for spawning shell commands in the pre dwm-5.0 fashion */
  #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
@@ -165,7 +165,7 @@ index 1c0b587..2055f56 100644
  	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
  	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
  	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
-@@ -89,11 +137,10 @@ static Key keys[] = {
+@@ -89,11 +135,10 @@ static Key keys[] = {
  	TAGKEYS(                        XK_3,                      2)
  	TAGKEYS(                        XK_4,                      3)
  	TAGKEYS(                        XK_5,                      4)
@@ -311,7 +311,7 @@ index 4bcd5ad..a56f523 100644
  /* Cursor abstraction */
  Cur *drw_cur_create(Drw *drw, int shape);
 diff --git a/dwm.c b/dwm.c
-index 4465af1..f6db57b 100644
+index 4465af1..254e457 100644
 --- a/dwm.c
 +++ b/dwm.c
 @@ -56,6 +56,7 @@
@@ -322,6 +322,15 @@ index 4465af1..f6db57b 100644
  
  /* enums */
  enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
+@@ -92,7 +93,7 @@ struct Client {
+ 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
+ 	int bw, oldbw;
+ 	unsigned int tags;
+-	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
++	int isfixed, ispermanent, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
+ 	Client *next;
+ 	Client *snext;
+ 	Monitor *mon;
 @@ -119,6 +120,10 @@ struct Monitor {
  	int by;               /* bar geometry */
  	int mx, my, mw, mh;   /* screen size */
@@ -333,7 +342,15 @@ index 4465af1..f6db57b 100644
  	unsigned int seltags;
  	unsigned int sellt;
  	unsigned int tagset[2];
-@@ -199,6 +204,16 @@ static void sendmon(Client *c, Monitor *m);
+@@ -138,6 +143,7 @@ typedef struct {
+ 	const char *title;
+ 	unsigned int tags;
+ 	int isfloating;
++	int ispermanent;
+ 	int monitor;
+ } Rule;
+ 
+@@ -199,6 +205,16 @@ static void sendmon(Client *c, Monitor *m);
  static void setclientstate(Client *c, long state);
  static void setfocus(Client *c);
  static void setfullscreen(Client *c, int fullscreen);
@@ -350,7 +367,16 @@ index 4465af1..f6db57b 100644
  static void setlayout(const Arg *arg);
  static void setmfact(const Arg *arg);
  static void setup(void);
-@@ -232,6 +247,7 @@ static Monitor *wintomon(Window w);
+@@ -209,7 +225,7 @@ static void spawn(const Arg *arg);
+ static void tag(const Arg *arg);
+ static void tagmon(const Arg *arg);
+ static void tile(Monitor *);
+-static void togglebar(const Arg *arg);
++// static void togglebar(const Arg *arg);
+ static void togglefloating(const Arg *arg);
+ static void toggletag(const Arg *arg);
+ static void toggleview(const Arg *arg);
+@@ -232,6 +248,7 @@ static Monitor *wintomon(Window w);
  static int xerror(Display *dpy, XErrorEvent *ee);
  static int xerrordummy(Display *dpy, XErrorEvent *ee);
  static int xerrorstart(Display *dpy, XErrorEvent *ee);
@@ -358,7 +384,7 @@ index 4465af1..f6db57b 100644
  static void zoom(const Arg *arg);
  
  /* variables */
-@@ -240,6 +256,7 @@ static char stext[256];
+@@ -240,6 +257,7 @@ static char stext[256];
  static int screen;
  static int sw, sh;           /* X display screen geometry width, height */
  static int bh, blw = 0;      /* bar geometry */
@@ -366,7 +392,7 @@ index 4465af1..f6db57b 100644
  static int lrpad;            /* sum of left and right padding for text */
  static int (*xerrorxlib)(Display *, XErrorEvent *);
  static unsigned int numlockmask = 0;
-@@ -268,6 +285,11 @@ static Drw *drw;
+@@ -268,6 +286,11 @@ static Drw *drw;
  static Monitor *mons, *selmon;
  static Window root, wmcheckwin;
  
@@ -378,7 +404,15 @@ index 4465af1..f6db57b 100644
  /* configuration, allows nested code to access above variables */
  #include "config.h"
  
-@@ -416,7 +438,7 @@ attachstack(Client *c)
+@@ -298,6 +321,7 @@ applyrules(Client *c)
+ 		&& (!r->instance || strstr(instance, r->instance)))
+ 		{
+ 			c->isfloating = r->isfloating;
++			c->ispermanent = r->ispermanent;
+ 			c->tags |= r->tags;
+ 			for (m = mons; m && m->num != r->monitor; m = m->next);
+ 			if (m)
+@@ -416,7 +440,7 @@ attachstack(Client *c)
  void
  buttonpress(XEvent *e)
  {
@@ -387,7 +421,7 @@ index 4465af1..f6db57b 100644
  	Arg arg = {0};
  	Client *c;
  	Monitor *m;
-@@ -430,9 +452,13 @@ buttonpress(XEvent *e)
+@@ -430,9 +454,12 @@ buttonpress(XEvent *e)
  		focus(NULL);
  	}
  	if (ev->window == selmon->barwin) {
@@ -396,14 +430,13 @@ index 4465af1..f6db57b 100644
 +		/* Bitmask of occupied tags */
 +		for (c = m->clients; c; c = c->next)
 +			occ |= c->tags;
-+
  		do
 -			x += TEXTW(tags[i]);
 +			x += TEXTW(occ & 1 << i ? alttags[i] : tags[i]);
  		while (ev->x >= x && ++i < LENGTH(tags));
  		if (i < LENGTH(tags)) {
  			click = ClkTagBar;
-@@ -638,6 +664,10 @@ createmon(void)
+@@ -638,6 +665,10 @@ createmon(void)
  	m->nmaster = nmaster;
  	m->showbar = showbar;
  	m->topbar = topbar;
@@ -414,7 +447,7 @@ index 4465af1..f6db57b 100644
  	m->lt[0] = &layouts[0];
  	m->lt[1] = &layouts[1 % LENGTH(layouts)];
  	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
-@@ -699,13 +729,14 @@ drawbar(Monitor *m)
+@@ -699,13 +730,14 @@ drawbar(Monitor *m)
  	int boxs = drw->fonts->h / 9;
  	int boxw = drw->fonts->h / 6 + 2;
  	unsigned int i, occ = 0, urg = 0;
@@ -431,7 +464,7 @@ index 4465af1..f6db57b 100644
  	}
  
  	for (c = m->clients; c; c = c->next) {
-@@ -715,13 +746,10 @@ drawbar(Monitor *m)
+@@ -715,13 +747,10 @@ drawbar(Monitor *m)
  	}
  	x = 0;
  	for (i = 0; i < LENGTH(tags); i++) {
@@ -449,7 +482,16 @@ index 4465af1..f6db57b 100644
  		x += w;
  	}
  	w = blw = TEXTW(m->ltsymbol);
-@@ -1497,6 +1525,111 @@ setfullscreen(Client *c, int fullscreen)
+@@ -1001,7 +1030,7 @@ keypress(XEvent *e)
+ void
+ killclient(const Arg *arg)
+ {
+-	if (!selmon->sel)
++	if (!selmon->sel || selmon->sel->ispermanent)
+ 		return;
+ 	if (!sendevent(selmon->sel, wmatom[WMDelete])) {
+ 		XGrabServer(dpy);
+@@ -1497,6 +1526,111 @@ setfullscreen(Client *c, int fullscreen)
  	}
  }
  
@@ -561,7 +603,7 @@ index 4465af1..f6db57b 100644
  void
  setlayout(const Arg *arg)
  {
-@@ -1541,11 +1674,12 @@ setup(void)
+@@ -1541,11 +1675,12 @@ setup(void)
  	sw = DisplayWidth(dpy, screen);
  	sh = DisplayHeight(dpy, screen);
  	root = RootWindow(dpy, screen);
@@ -577,7 +619,7 @@ index 4465af1..f6db57b 100644
  	updategeom();
  	/* init atoms */
  	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
-@@ -1569,7 +1703,7 @@ setup(void)
+@@ -1569,7 +1704,7 @@ setup(void)
  	/* init appearance */
  	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
  	for (i = 0; i < LENGTH(colors); i++)
@@ -586,7 +628,7 @@ index 4465af1..f6db57b 100644
  	/* init bars */
  	updatebars();
  	updatestatus();
-@@ -1673,26 +1807,32 @@ tagmon(const Arg *arg)
+@@ -1673,37 +1808,43 @@ tagmon(const Arg *arg)
  void
  tile(Monitor *m)
  {
@@ -629,7 +671,20 @@ index 4465af1..f6db57b 100644
  		}
  }
  
-@@ -1804,16 +1944,18 @@ updatebars(void)
+-void
++/* void
+ togglebar(const Arg *arg)
+ {
+ 	selmon->showbar = !selmon->showbar;
+ 	updatebarpos(selmon);
+ 	XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
+ 	arrange(selmon);
+-}
++} */
+ 
+ void
+ togglefloating(const Arg *arg)
+@@ -1804,16 +1945,18 @@ updatebars(void)
  	Monitor *m;
  	XSetWindowAttributes wa = {
  		.override_redirect = True,
@@ -652,7 +707,7 @@ index 4465af1..f6db57b 100644
  		XDefineCursor(dpy, m->barwin, cursor[CurNormal]->cursor);
  		XMapRaised(dpy, m->barwin);
  		XSetClassHint(dpy, m->barwin, &ch);
-@@ -2110,6 +2252,43 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
+@@ -2110,6 +2253,43 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
  	return -1;
  }
  
