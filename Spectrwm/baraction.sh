@@ -90,7 +90,7 @@ while :; do
 	# print_cpuspeed
 	print_bat $ACPI_DATA
 	print_essid
-	echo "${SEP}See you space cowboy"
+	echo "${SEP}Darling"
 	I=$(( ( ${I} + 1 ) % 11 ))
 	sleep 1
 done
