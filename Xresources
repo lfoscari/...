@@ -1,0 +1,85 @@
+! General
+
+URxvt.font: xft:monospace:style=Regular:size=11
+URxvt.boldFont: xft:monospace:style=Bold:size=11
+URxvt.italicFont: xft:monospace:style=Oblique:size=11
+URxvt.boldItalicFont: xft:monospace:style=BoldOblique:size=11
+URxvt.letterSpace: 0
+URxvt.lineSpace: 0
+
+! General appearance and behaviour
+URxvt.internalBorder: 24
+URxvt.cursorBlink: true
+URxvt.cursorUnderline: false
+URxvt.saveline: 2048
+URxvt.scrollBar: false
+URxvt.urgentOnBell: true
+URxvt.iso14755: false
+
+! X colors.
+*foreground:        #ece6c2
+*background:        #191211
+*.foreground:       #ece6c2
+*.background:       #191211
+emacs*foreground:   #ece6c2
+emacs*background:   #191211
+URxvt*foreground:   #ece6c2
+XTerm*foreground:   #ece6c2
+UXTerm*foreground:  #ece6c2
+URxvt*background:   [90]#191211
+XTerm*background:   #191211
+UXTerm*background:  #191211
+URxvt*cursorColor:  #ece6c2
+XTerm*cursorColor:  #ece6c2
+UXTerm*cursorColor: #ece6c2
+URxvt*borderColor:  [90]#191211
+
+! Colors 0-15.
+*.color0: #191211
+*color0:  #191211
+*.color1: #8F6D48
+*color1:  #8F6D48
+*.color2: #A87847
+*color2:  #A87847
+*.color3: #7A885C
+*color3:  #7A885C
+*.color4: #AF8F5A
+*color4:  #AF8F5A
+*.color5: #CB9450
+*color5:  #CB9450
+*.color6: #D1C695
+*color6:  #D1C695
+*.color7: #ece6c2
+*color7:  #ece6c2
+*.color8: #a5a187
+*color8:  #a5a187
+*.color9: #8F6D48
+*color9:  #8F6D48
+*.color10: #A87847
+*color10:  #A87847
+*.color11: #7A885C
+*color11:  #7A885C
+*.color12: #AF8F5A
+*color12:  #AF8F5A
+*.color13: #CB9450
+*color13:  #CB9450
+*.color14: #D1C695
+*color14:  #D1C695
+*.color15: #ece6c2
+*color15:  #ece6c2
+
+! Black color that will not be affected by bold highlighting.
+*.color66: #191211
+*color66:  #191211
+
+! Xclock colors.
+XClock*foreground: #ece6c2
+XClock*background: #191211
+XClock*majorColor:  rgba:ec/e6/c2/ff
+XClock*minorColor:  rgba:ec/e6/c2/ff
+XClock*hourColor:   rgba:ec/e6/c2/ff
+XClock*minuteColor: rgba:ec/e6/c2/ff
+XClock*secondColor: rgba:ec/e6/c2/ff
+
+! Set depth to make transparency work.
+URxvt*depth: 32
