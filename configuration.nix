@@ -4,6 +4,7 @@
   imports = [
     <nixos-hardware/lenovo/thinkpad/p53>
     ./hardware-configuration.nix
+	./home-manager.nix
   ];
 
 
@@ -170,7 +171,7 @@
       };
 
       # Select video drivers
-      videoDrivers = [ "intel" ];
+      # videoDrivers = [ "intel" ];
     };
 
     # Start picom compositor
@@ -189,8 +190,13 @@
       wayland = false;
     };
 
-    # Use gnome3 as Desktop Manager
-    desktopManager.gnome3.enable = true;
+    desktopManager = {
+	  # The chosen one
+	  gnome3.enable = true;
+
+      # Remove Xterm
+      xterm.enable = false;
+	};
   };
 
   services.gnome3 = {
@@ -236,9 +242,7 @@
       antialias = true;
 
       # Monospace font
-      defaultFonts.monospace = [
-        "JetBrainsMono"
-      ];
+      defaultFonts.monospace = [ "JetBrainsMono" ];
     };
   };
 
@@ -250,12 +254,22 @@
   programs.vim.defaultEditor = true;
   environment.variables = { EDITOR = "vim"; };
 
+  documentation = {
+	enable = false;
+    nixos.enable = false;
+    info.enable = false;
+    doc.enable = false;
+  };
+
+# openpyxl
+# pylint
+
   environment = {
     shellAliases = { ":q" = "exit"; };
 
     systemPackages = with pkgs; [
       microcodeIntel
-      firefox
+	  gnome3.gnome-tweaks
       vscode
       git
       rxvt-unicode
@@ -269,7 +283,6 @@
       wget
       tdesktop
       discord
-      python3
       unzip
 	  feh
 	  pywal
@@ -279,6 +292,7 @@
 	  libreoffice
 	  neofetch
       texlive.combined.scheme-medium
-    ];
+	  python3
+	];
   };
 }
