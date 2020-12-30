@@ -17,11 +17,21 @@
       }) { inherit pkgs; };
     };
 
+
+    # ----------------------------------------------
+    # HOME MANAGER
+
     programs.home-manager.enable = true;
 
     # home.packages = with pkgs; [
 	#   ...
 	# ];
+
+    programs.git = {
+      enable = true;
+      userName = "Luigi Foscari";
+      userEmail = "luigi.foscari@icloud.com";
+    };
 
     programs.firefox = {
 	  enable = true;
@@ -35,9 +45,14 @@
       enableAutosuggestions = true;
       enableCompletion = true;
 
+      shellAliases = {
+        ":q" = "exit";
+        "ocaml" = "rlwrap ocaml";
+      };
+
       oh-my-zsh = {
         enable = true;
-        theme = "bira";
+        theme = "kennethreitz";
         plugins = ["git"];
       };
     };

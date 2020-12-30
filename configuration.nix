@@ -2,9 +2,9 @@
 
 {
   imports = [
-    <nixos-hardware/lenovo/thinkpad/p53>
+    # <nixos-hardware/lenovo/thinkpad/p53>
     ./hardware-configuration.nix
-	./home-manager.nix
+    ./home-manager.nix
   ];
 
 
@@ -12,14 +12,14 @@
   # BOOTLOADER
 
   boot = {
-    # Zen Kernel for responsiveness
+    # # Zen Kernel for responsiveness
     # kernelPackages = pkgs.linuxPackages_zen;
 
-    kernelParams = [
-      "quiet"
-      "splash"
-      "pci=noaer"
-    ];
+    # kernelParams = [
+    #   "quiet"
+    #   "splash"
+    #   "pci=noaer"
+    # ];
 
     loader = {
       grub = {
@@ -43,7 +43,7 @@
     };
 
 	# Splash screen
-	plymouth.enable = true;
+    # plymouth.enable = true;
   };
 
 
@@ -103,17 +103,21 @@
   # Use X server keymap
   console.useXkbConfig = true;
 
-  users.users.gg = {
-    isNormalUser = true;
-    hashedPassword = "$6$9LlH7Voy.y2qC$Q/pvglsziQNB6fSfQvE9TfeFNdsZSHWzdRjNLqX/.8XZfFJU8J.u1mOd1ae.8kbgyBnCMUoDnK1QzbN7FQccE/";
-    shell = pkgs.zsh;
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-      "audio"
-      "video"
-      "dialout"
-    ];
+  programs.zsh.enable = true;
+
+  users = {
+    users.gg = {
+      isNormalUser = true;
+      hashedPassword = "$6$N/s24ELlVB$UJ35fj3hM1u5UvRs7q2TWUudOxekxgkXT23NpAKbdeBoRaZLKoBXm9xucDKMsZoUFnPsqXo2rogRL1g79M.jE1";
+      shell = pkgs.zsh;
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+        "audio"
+        "video"
+        "dialout"
+      ];
+    };
   };
 
 
@@ -175,7 +179,7 @@
     };
 
     # Start picom compositor
-    # picom.enable = true;
+    picom.enable = true;
   };
 
 
@@ -230,6 +234,12 @@
 	gnome-photos
   ];
 
+  # Fingerprint sensor
+  services.fprintd.enable = true;
+  security.pam.services = {
+    login.fprintAuth = true;
+    xscreensaver.fprintAuth = true;
+  };
 
   # ----------------------------------------------
   # FONTS
@@ -261,19 +271,22 @@
     doc.enable = false;
   };
 
-# openpyxl
-# pylint
-
   environment = {
-    shellAliases = { ":q" = "exit"; };
+    shellAliases = {
+      ":q" = "exit";
+      "ocaml" = "rlwrap ocaml";
+    };
 
     systemPackages = with pkgs; [
       microcodeIntel
 	  gnome3.gnome-tweaks
       vscode
       git
+      zsh
+      lshw
+      zathura
+      xdotool
       rxvt-unicode
-      dmenu
       nodejs
       bitwarden
       bitwarden-cli
@@ -284,15 +297,19 @@
       tdesktop
       discord
       unzip
-	  feh
 	  pywal
 	  powertop
 	  dropbox
+      # dropbox-cli
 	  thunderbird
 	  libreoffice
 	  neofetch
-      texlive.combined.scheme-medium
+      # texlive.combined.scheme-full
+      (texlive.combine { inherit (texlive) scheme-medium; })
 	  python3
+      rlwrap
+      ocamlPackages.merlin
+      ocamlPackages.ocaml
 	];
   };
 }
