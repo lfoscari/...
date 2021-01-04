@@ -24,8 +24,8 @@
     programs.home-manager.enable = true;
 
     # home.packages = with pkgs; [
-	#   ...
-	# ];
+    #   ...
+    # ];
 
     programs.git = {
       enable = true;
@@ -47,13 +47,14 @@
 
       shellAliases = {
         ":q" = "exit";
+        "vim" = "nvim";
         "ocaml" = "rlwrap ocaml";
       };
 
       oh-my-zsh = {
         enable = true;
-        theme = "kennethreitz";
-        plugins = ["git"];
+        # theme = "kennethreitz";
+        # plugins = ["git"];
       };
     };
   };

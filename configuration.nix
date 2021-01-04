@@ -103,21 +103,20 @@
   # Use X server keymap
   console.useXkbConfig = true;
 
+  # I use zsh
   programs.zsh.enable = true;
 
-  users = {
-    users.gg = {
-      isNormalUser = true;
-      hashedPassword = "$6$N/s24ELlVB$UJ35fj3hM1u5UvRs7q2TWUudOxekxgkXT23NpAKbdeBoRaZLKoBXm9xucDKMsZoUFnPsqXo2rogRL1g79M.jE1";
-      shell = pkgs.zsh;
-      extraGroups = [
-        "wheel"
-        "networkmanager"
-        "audio"
-        "video"
-        "dialout"
-      ];
-    };
+  users.users.gg = {
+    isNormalUser = true;
+    hashedPassword = "$6$N/s24ELlVB$UJ35fj3hM1u5UvRs7q2TWUudOxekxgkXT23NpAKbdeBoRaZLKoBXm9xucDKMsZoUFnPsqXo2rogRL1g79M.jE1";
+    shell = pkgs.zsh;
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "audio"
+      "video"
+      "dialout"
+    ];
   };
 
 
@@ -144,9 +143,11 @@
   # Enable CUPS print framework
   services.printing.enable = true;
 
+  # Battery managemente
   services.tlp = {
     enable = true;
 
+    # Suggested parameters for a Lenovo IML 13"
 	settings = {
 	  START_CHARGE_TRESH_BAT0 = 67;
       STOP_CHARGE_TRESH_BAT0 = 100;
@@ -179,7 +180,7 @@
     };
 
     # Start picom compositor
-    picom.enable = true;
+    # picom.enable = true;
   };
 
 
@@ -215,6 +216,9 @@
 
     # Add Keyring
     gnome-keyring.enable = true;
+
+    # Enable shell extensions
+    # gnome-shell.enable = true;
   };
 
   # Remove unwanted Gnome software
@@ -260,9 +264,16 @@
   # ----------------------------------------------
   # ENVIRONMENT
 
+  # NEOVIM Nightly (for VSCode compatibility)
+  nixpkgs.overlays = [
+    (import (builtins.fetchTarball {
+      url = https://github.com/nix-community/neovim-nightly-overlay/archive/master.tar.gz;
+    }))
+  ];
+
   # Vim as default
-  programs.vim.defaultEditor = true;
-  environment.variables = { EDITOR = "vim"; };
+  # programs.nvim.defaultEditor = true;
+  environment.variables = { EDITOR = "nvim"; };
 
   documentation = {
 	enable = false;
@@ -278,10 +289,16 @@
     };
 
     systemPackages = with pkgs; [
+      neovim-nightly
       microcodeIntel
-	  gnome3.gnome-tweaks
+      gnome3.gnome-tweaks
+      gnome3.dconf
+      pop-icon-theme
+      arc-theme
       vscode
       git
+      binutils
+      gcc
       zsh
       lshw
       zathura
@@ -303,13 +320,18 @@
       # dropbox-cli
 	  thunderbird
 	  libreoffice
-	  neofetch
-      # texlive.combined.scheme-full
-      (texlive.combine { inherit (texlive) scheme-medium; })
+      transgui
+      neofetch
+      killall
+      texlive.combined.scheme-full
 	  python3
       rlwrap
-      ocamlPackages.merlin
       ocamlPackages.ocaml
+      ocamlPackages.utop
+      ocamlPackages.merlin
+      ocamlPackages.ocp-indent
+      ocamlPackages.dune
+      ocamlPackages.csv
 	];
   };
 }
